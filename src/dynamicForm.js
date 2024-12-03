@@ -29,6 +29,7 @@ const DynamicForm = () => {
   const [editIndex, setEditIndex] = useState(null); // Index of the entry edited
   const [progress, setProgress] = useState(0); //State Progress
   const [sucessMessage, setSuccessMessage] = useState("");  //State user feedback
+  const [messageType, setMessageType] = useState("success");
 
   useEffect(() => {
     // Simulate API response based on formType
@@ -154,12 +155,15 @@ const DynamicForm = () => {
       setSubmittedData(updatedData);
       setEditIndex(null);
       setSuccessMessage("Changes Saved Sucessfully");
+      setMessageType("success");
     } else {
       if (!updatedData[formType]) {
         updatedData[formType] = [];
       }
       updatedData[formType] = [...updatedData[formType], formData]; // Append new data to existing data
       setSubmittedData(updatedData);
+      setSuccessMessage("Form Submitted succesfully!");  // Clear success message on submission
+      setMessageType("done");
     }
     saveToLocalStorage(updatedData); // Save updated data to local storage
 
@@ -171,7 +175,8 @@ const DynamicForm = () => {
     setFormData(submittedData[formType][index]);
     setEditIndex(index);
     setFormType(formType);
-    setSuccessMessage("");  // Clear success message on edit
+    setSuccessMessage("");
+
   };
 
   const handleDelete = (formType, index) => {
@@ -180,6 +185,7 @@ const DynamicForm = () => {
     setSubmittedData(updatedData);
     saveToLocalStorage(updatedData); // Save updated data to local storage
     setSuccessMessage("Entry deleted successfully!");
+    setMessageType("remove");
   };
 
   const renderTable = (formType, data) => {
@@ -232,7 +238,7 @@ const DynamicForm = () => {
   
   return (
     <div className="flex p-4 bg-white rounded-lg shadow-md">
-      <div className="w-1/2 p-4">
+      <div className="w-full p-4 form-container">
       {/* Progress Bar*/}
       <div className="mb-4"> 
         <div className="h-4 bg-gray-200 rounded-full"> 
@@ -242,7 +248,7 @@ const DynamicForm = () => {
           <p className="text-sm text-right mt-1">{Math.round(progress)}% completed</p>
       </div>
       {sucessMessage && (
-        <div className="mb-4 p-2 bg-green-100 text-green-700 rounded">
+        <div className={`mb-4 p-2 rounded ${messageType === 'done' ? 'bg-green-100 text-green-700' : messageType === 'remove' ? 'bg-red-100 text-red-700': 'bg-blue-100 text-blue-700'}`}>
           {sucessMessage}
         </div>
       )}
@@ -295,7 +301,7 @@ const DynamicForm = () => {
           </button>
         </form>
       </div>
-      <div className="w-1/2 p-4">
+      <div className="w-full p-4">
         {Object.keys(submittedData)
           .filter((formType) => submittedData[formType] && submittedData[formType].length > 0)
           .map((formType) =>

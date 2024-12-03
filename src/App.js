@@ -12,7 +12,7 @@ function App() {
            <DynamicForm/>
         </div>
       <footer>
-        <p>&copy; 2024 Dynamic Form. All rights reserved</p>
+        <p>&copy; 2024 Dynamic Form by Sahil Singh. All rights reserved</p>
       </footer>
     </div>
   );
