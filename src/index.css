@@ -20,11 +20,6 @@ code {
   margin-top: 2rem;
 }
 
-/* .app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-} */
 
 header {
   background-color: #4caf50;
@@ -67,16 +62,16 @@ footer {
   }
 
   .form-container {
-    display: block; /* Ensure the form takes full width */
+    display: block; 
     width: 100%;
-    margin-bottom: 1.5rem; /* Add space below the form */
+    margin-bottom: 1.5rem;
   }
 
   form {
     display: flex;
-    flex-direction: column; /* Stack inputs and button vertically */
-    gap: 1rem; /* Space between form elements */
-    width: 100%; /* Ensure form spans full width */
+    flex-direction: column; 
+    gap: 1rem; 
+    width: 100%; 
   }
 
   form input,
@@ -93,7 +88,7 @@ footer {
   }
 
   table {
-    width: 100%; /* Ensure the table spans the full screen */
+    width: 100%; 
     margin-top: 0; /* No extra margin at the top */
   }
 
@@ -111,4 +106,3 @@ footer {
     border: 1px solid #ddd;
   }
 }
-

@@ -1,6 +1,6 @@
-import React from 'react';
-import DynamicForm from './dynamicForm'
-import './index.css';
+import React from "react";
+import DynamicForm from "./dynamicForm";
+import "./index.css";
 
 function App() {
   return (
@@ -8,9 +8,9 @@ function App() {
       <header className="App-header">
         <h1>Dynamic Form</h1>
       </header>
-        <div className='content'>
-           <DynamicForm/>
-        </div>
+      <div className="content">
+        <DynamicForm />
+      </div>
       <footer>
         <p>&copy; 2024 Dynamic Form by Sahil Singh. All rights reserved</p>
       </footer>

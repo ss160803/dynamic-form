@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./index.css";
 
-
 // Function to store data in local storage
 const saveToLocalStorage = (data) => {
   localStorage.setItem("submittedData", JSON.stringify(data));
@@ -28,7 +27,7 @@ const DynamicForm = () => {
   const [submittedData, setSubmittedData] = useState(loadFromLocalStorage()); // Store submitted data
   const [editIndex, setEditIndex] = useState(null); // Index of the entry edited
   const [progress, setProgress] = useState(0); //State Progress
-  const [sucessMessage, setSuccessMessage] = useState("");  //State user feedback
+  const [sucessMessage, setSuccessMessage] = useState(""); //State user feedback
   const [messageType, setMessageType] = useState("success");
 
   useEffect(() => {
@@ -84,15 +83,14 @@ const DynamicForm = () => {
     setErrors({});
   }, [formType]);
 
-  useEffect(() =>{
+  useEffect(() => {
     //Calculate Progress
-    const totalRequired = formFields.filter((field)=> field.required).length;
+    const totalRequired = formFields.filter((field) => field.required).length;
     const completed = formFields.filter(
       (field) => field.required && formData[field.name]
-    ).length
+    ).length;
     const progress = totalRequired > 0 ? (completed / totalRequired) * 100 : 0;
     setProgress(progress);
-
   }, [formData, formFields]);
 
   const handleInputChange = (e, field) => {
@@ -111,7 +109,7 @@ const DynamicForm = () => {
       [field.name]: "",
     });
 
-    setSuccessMessage("");  // Clear success message on input change
+    setSuccessMessage(""); // Clear success message on input change
   };
 
   const handleSubmit = (e) => {
@@ -162,7 +160,7 @@ const DynamicForm = () => {
       }
       updatedData[formType] = [...updatedData[formType], formData]; // Append new data to existing data
       setSubmittedData(updatedData);
-      setSuccessMessage("Form Submitted succesfully!");  // Clear success message on submission
+      setSuccessMessage("Form Submitted succesfully!"); // Clear success message on submission
       setMessageType("done");
     }
     saveToLocalStorage(updatedData); // Save updated data to local storage
@@ -176,7 +174,6 @@ const DynamicForm = () => {
     setEditIndex(index);
     setFormType(formType);
     setSuccessMessage("");
-
   };
 
   const handleDelete = (formType, index) => {
@@ -191,7 +188,7 @@ const DynamicForm = () => {
   const renderTable = (formType, data) => {
     if (!data || data.length === 0) return null;
     const headers = Object.keys(data[0]);
-  
+
     return (
       <div className="mt-8" key={formType}>
         <h2 className="text-xl mb-4">{formType}</h2>
@@ -235,23 +232,35 @@ const DynamicForm = () => {
       </div>
     );
   };
-  
+
   return (
     <div className="flex p-4 bg-white rounded-lg shadow-md">
       <div className="w-full p-4 form-container">
-      {/* Progress Bar*/}
-      <div className="mb-4"> 
-        <div className="h-4 bg-gray-200 rounded-full"> 
-          <div className="h-4 bg-green-500 rounded-full" style={{ width: `${progress}%` }} 
-          ></div> 
-          </div> 
-          <p className="text-sm text-right mt-1">{Math.round(progress)}% completed</p>
-      </div>
-      {sucessMessage && (
-        <div className={`mb-4 p-2 rounded ${messageType === 'done' ? 'bg-green-100 text-green-700' : messageType === 'remove' ? 'bg-red-100 text-red-700': 'bg-blue-100 text-blue-700'}`}>
-          {sucessMessage}
+        {/* Progress Bar*/}
+        <div className="mb-4">
+          <div className="h-4 bg-gray-200 rounded-full">
+            <div
+              className="h-4 bg-green-500 rounded-full"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          <p className="text-sm text-right mt-1">
+            {Math.round(progress)}% completed
+          </p>
         </div>
-      )}
+        {sucessMessage && (
+          <div
+            className={`mb-4 p-2 rounded ${
+              messageType === "done"
+                ? "bg-green-100 text-green-700"
+                : messageType === "remove"
+                ? "bg-red-100 text-red-700"
+                : "bg-blue-100 text-blue-700"
+            }`}
+          >
+            {sucessMessage}
+          </div>
+        )}
         <select
           onChange={(e) => setFormType(e.target.value)}
           className="mb-4 p-2 border rounded"
@@ -303,13 +312,13 @@ const DynamicForm = () => {
       </div>
       <div className="w-full p-4">
         {Object.keys(submittedData)
-          .filter((formType) => submittedData[formType] && submittedData[formType].length > 0)
-          .map((formType) =>
-            renderTable(formType, submittedData[formType])
-          )}
+          .filter(
+            (formType) =>
+              submittedData[formType] && submittedData[formType].length > 0
+          )
+          .map((formType) => renderTable(formType, submittedData[formType]))}
       </div>
     </div>
   );
-}; 
-  export default DynamicForm;
-  
+};
+export default DynamicForm;
