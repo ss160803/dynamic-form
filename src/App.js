@@ -6,11 +6,14 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        {/* <p>
-          Dynamic Form Implementation
-        </p> */}
+        <h1>Dynamic Form</h1>
       </header>
-      <DynamicForm/>
+        <div className='content'>
+           <DynamicForm/>
+        </div>
+      <footer>
+        <p>&copy; 2024 Dynamic Form. All rights reserved</p>
+      </footer>
     </div>
   );
 }

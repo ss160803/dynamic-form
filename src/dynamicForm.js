@@ -1,32 +1,34 @@
 import React, { useState, useEffect } from "react";
 import "./index.css";
 
-//Function to store data in local storage
+
+// Function to store data in local storage
 const saveToLocalStorage = (data) => {
   localStorage.setItem("submittedData", JSON.stringify(data));
-}; //save data in local storage
+}; // Save data in local storage
 
 const loadFromLocalStorage = () => {
   const data = localStorage.getItem("submittedData");
   if (!data) {
-    return [];
+    return {};
   }
   try {
     return JSON.parse(data);
   } catch (error) {
     console.error("Error Parsing JSON from localStorage:", error);
-    return [];
+    return {};
   }
-}; //load data from local storage
+}; // Load data from local storage
 
 const DynamicForm = () => {
   const [formFields, setFormFields] = useState([]);
   const [formType, setFormType] = useState("");
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submittedData, setSubmittedData] = useState(loadFromLocalStorage); //Store submitted data
-  const [editIndex, setEditIndex] = useState(null); //Index of the entry edited
+  const [submittedData, setSubmittedData] = useState(loadFromLocalStorage()); // Store submitted data
+  const [editIndex, setEditIndex] = useState(null); // Index of the entry edited
+  const [progress, setProgress] = useState(0); //State Progress
+  const [sucessMessage, setSuccessMessage] = useState("");  //State user feedback
 
   useEffect(() => {
     // Simulate API response based on formType
@@ -79,8 +81,18 @@ const DynamicForm = () => {
     setFormFields(apiResponses[formType] || []);
     setFormData({});
     setErrors({});
-    setIsSubmitted(false);
   }, [formType]);
+
+  useEffect(() =>{
+    //Calculate Progress
+    const totalRequired = formFields.filter((field)=> field.required).length;
+    const completed = formFields.filter(
+      (field) => field.required && formData[field.name]
+    ).length
+    const progress = totalRequired > 0 ? (completed / totalRequired) * 100 : 0;
+    setProgress(progress);
+
+  }, [formData, formFields]);
 
   const handleInputChange = (e, field) => {
     const value = e.target.value;
@@ -91,13 +103,14 @@ const DynamicForm = () => {
 
     setFormData({
       ...formData,
-      [field.name]: e.target.value,
+      [field.name]: value,
     });
     setErrors({
       ...errors,
       [field.name]: "",
     });
-    setIsSubmitted(false);
+
+    setSuccessMessage("");  // Clear success message on input change
   };
 
   const handleSubmit = (e) => {
@@ -130,140 +143,167 @@ const DynamicForm = () => {
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      setIsSubmitted(false);
       return;
     }
 
     // Handle form submission
     console.log("Form submitted successfully", formData);
-    let updatedData;
+    let updatedData = { ...submittedData };
     if (editIndex !== null) {
-      const updatedData = [...submittedData];
-      updatedData[editIndex] = formData;
+      updatedData[formType][editIndex] = formData;
       setSubmittedData(updatedData);
       setEditIndex(null);
+      setSuccessMessage("Changes Saved Sucessfully");
     } else {
-      updatedData = [...submittedData, formData]; //Appends new data to existing data
+      if (!updatedData[formType]) {
+        updatedData[formType] = [];
+      }
+      updatedData[formType] = [...updatedData[formType], formData]; // Append new data to existing data
       setSubmittedData(updatedData);
     }
-    setIsSubmitted(true);
-    saveToLocalStorage(updatedData); //save updated data to local storage
+    saveToLocalStorage(updatedData); // Save updated data to local storage
 
-    setFormData({}); // Clear input fields
+    // Clear input fields after submission
+    setFormData({});
   };
 
-  const handleEdit = (index) => {
-    setFormData(submittedData[index]);
+  const handleEdit = (formType, index) => {
+    setFormData(submittedData[formType][index]);
     setEditIndex(index);
+    setFormType(formType);
+    setSuccessMessage("");  // Clear success message on edit
   };
 
-  const handleDelete = (index) => {
-    const updatedData = submittedData.filter((_, i) => i !== index);
+  const handleDelete = (formType, index) => {
+    const updatedData = { ...submittedData };
+    updatedData[formType] = updatedData[formType].filter((_, i) => i !== index);
     setSubmittedData(updatedData);
-    saveToLocalStorage(updatedData); //Save updated data to local storage
+    saveToLocalStorage(updatedData); // Save updated data to local storage
+    setSuccessMessage("Entry deleted successfully!");
   };
 
-  const headers = submittedData.length > 0 ? Object.keys(submittedData[0]): [];
-
-  return (
-    <div className="p-4 max-w-lg mx-auto bg-white rounded-lg shadow-md">
-      <select
-        onChange={(e) => setFormType(e.target.value)}
-        className="mb-4 p-2 border rounded"
-      >
-        <option value="">Select Form Type</option>
-        <option value="User Information">User Information</option>
-        <option value="Address Information">Address Information</option>
-        <option value="Payment Information">Payment Information</option>
-      </select>
-      <form onSubmit={handleSubmit} noValidate>
-        {formFields.map((field) => (
-          <div key={field.name} className="mb-4">
-            <label className="block mb-2">
-              {field.label}
-              {field.required && <span className="text-red-500"> *</span>}
-            </label>
-            {field.type === "dropdown" ? (
-              <select
-                required={field.required}
-                className="p-2 border rounded w-full"
-                value={formData[field.name] || ""}
-                onChange={(e) => handleInputChange(e, field)}
-              >
-                {field.options.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type={field.type}
-                required={field.required}
-                className="p-2 border rounded w-full"
-                value={formData[field.name] || ""}
-                onChange={(e) => handleInputChange(e, field)}
-              />
-            )}
-            {errors[field.name] && (
-              <p className="text-red-500">{errors[field.name]}</p>
-            )}
-          </div>
-        ))}
-        <button type="submit" className="p-2 bg-blue-500 text-white rounded">
-          Submit
-        </button>
-      </form>
-      {isSubmitted && (
-        //   Object.keys(errors).length === 0 && Object.keys(formData).length > 0 &&
-        <p className="text-green-500">Sign-up Successfull</p>
-      )}
-
-      {/* Tabular Display of form data */}
-      {submittedData.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-xl mb-4">Submitted Data</h2>
-          <table className="min-w-full bg-white">
-            <thead>
-              <tr>
-                {headers.map((key) => (
-                  <th key={key} className="py-2 px-4 bg-gray-200">
-                    {key}
-                  </th>
-                ))}
-                <th className="py-2 px-4 bg-gray-200">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {submittedData.map((data, index) => (
-                <tr key={index}>
-                  {Object.values(data).map((value, i) => (
-                    <td key={i} className="border px-4 py-2">
-                      {value}
-                    </td>
-                  ))}
-                  <td className="border px-4 py-2">
-                    <button
-                      onClick={() => handleEdit(index)}
-                      className="mr-2 bg-blue-500 text-white px-2 py-1 rounded"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(index)}
-                      className="bg-red-500 text-white px-2 py-1 rounded"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
+  const renderTable = (formType, data) => {
+    if (!data || data.length === 0) return null;
+    const headers = Object.keys(data[0]);
+  
+    return (
+      <div className="mt-8" key={formType}>
+        <h2 className="text-xl mb-4">{formType}</h2>
+        <table className="min-w-full bg-white">
+          <thead>
+            <tr>
+              {headers.map((key) => (
+                <th key={key} className="py-2 px-4 bg-gray-200">
+                  {key}
+                </th>
               ))}
-            </tbody>
-          </table>
+              <th className="py-2 px-4 bg-gray-200">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((row, index) => (
+              <tr key={index}>
+                {headers.map((key) => (
+                  <td key={key} className="border px-4 py-2">
+                    {row[key]}
+                  </td>
+                ))}
+                <td className="border px-4 py-2">
+                  <button
+                    onClick={() => handleEdit(formType, index)}
+                    className="mr-2 bg-blue-500 text-white px-2 py-1 rounded"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(formType, index)}
+                    className="bg-red-500 text-white px-2 py-1 rounded"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+  
+  return (
+    <div className="flex p-4 bg-white rounded-lg shadow-md">
+      <div className="w-1/2 p-4">
+      {/* Progress Bar*/}
+      <div className="mb-4"> 
+        <div className="h-4 bg-gray-200 rounded-full"> 
+          <div className="h-4 bg-green-500 rounded-full" style={{ width: `${progress}%` }} 
+          ></div> 
+          </div> 
+          <p className="text-sm text-right mt-1">{Math.round(progress)}% completed</p>
+      </div>
+      {sucessMessage && (
+        <div className="mb-4 p-2 bg-green-100 text-green-700 rounded">
+          {sucessMessage}
         </div>
       )}
+        <select
+          onChange={(e) => setFormType(e.target.value)}
+          className="mb-4 p-2 border rounded"
+          value={formType}
+        >
+          <option value="">Select Form Type</option>
+          <option value="User Information">User Information</option>
+          <option value="Address Information">Address Information</option>
+          <option value="Payment Information">Payment Information</option>
+        </select>
+        <form onSubmit={handleSubmit} noValidate>
+          {formFields.map((field) => (
+            <div key={field.name} className="mb-4">
+              <label className="block mb-2">
+                {field.label}
+                {field.required && <span className="text-red-500"> *</span>}
+              </label>
+              {field.type === "dropdown" ? (
+                <select
+                  required={field.required}
+                  className="p-2 border rounded w-full"
+                  value={formData[field.name] || ""}
+                  onChange={(e) => handleInputChange(e, field)}
+                >
+                  {field.options.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type={field.type}
+                  required={field.required}
+                  className="p-2 border rounded w-full"
+                  value={formData[field.name] || ""}
+                  onChange={(e) => handleInputChange(e, field)}
+                />
+              )}
+              {errors[field.name] && (
+                <p className="text-red-500">{errors[field.name]}</p>
+              )}
+            </div>
+          ))}
+          <button type="submit" className="p-2 bg-blue-500 text-white rounded">
+            Submit
+          </button>
+        </form>
+      </div>
+      <div className="w-1/2 p-4">
+        {Object.keys(submittedData)
+          .filter((formType) => submittedData[formType] && submittedData[formType].length > 0)
+          .map((formType) =>
+            renderTable(formType, submittedData[formType])
+          )}
+      </div>
     </div>
   );
-};
-
-export default DynamicForm;
+}; 
+  export default DynamicForm;
+  
