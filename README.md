@@ -33,27 +33,30 @@ This project is a dynamic form application built with React. It supports multipl
 
 1. **Dynamic Form Rendering**
 
-- Implemented a dynamic form that adjusts based on the user's selection.
+   - Implemented a dynamic form that adjusts based on the user's selection.
 
-- Simulated API responses to fetch form structure based on form type.
+   - Simulated API responses to fetch form structure based on form type.
 
 2. **Form Validation**
 
-- Added form validation to ensure required fields are filled.
+   - Added form validation to ensure required fields are filled.
 
-- Included custom validation for specific fields like age and card number.
+   - Included custom validation for specific fields like age and card number.
 
 3. **Progress Indicator**
 
-- Added a progress bar to provide real-time feedback on form completion.
+   - Added a progress bar to provide real-time feedback on form completion.
 
 4. **User Feedback**
 
-- Implemented success messages for form submissions, edits, and deletions.
+   - Implemented success messages for form submissions, edits, and deletions.
 
-- Added different colors for success messages to distinguish between actions (e.g., blue for submissions, red for deletions).
+   - Added different colors for success messages to distinguish between actions (e.g., blue for submissions, red for deletions).
 
 5. **Error Handling**
 
-- Ensured form validation errors are displayed with user-friendly messages.
+   - Ensured form validation errors are displayed with user-friendly messages.
+
+## License
+This project is licensed under the MIT License 
 
